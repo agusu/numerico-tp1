@@ -10,7 +10,8 @@ def main():
     tol = 0.01
     w = obtener_w_optimo(matriz, semilla, f, tol)
     tol = 0.0001
-    x, cant_iter = SOR(matriz, semilla, f, w, tol)
+    x, cant_iter,p = SOR(matriz, semilla, f, w, tol)
+    exportarresultadosacsv(x)
 
 
 def drange(x, y, jump):
@@ -23,8 +24,9 @@ def obtener_w_optimo(A, x, b, tol):
     iteraciones_w = dict()
     w_optimo = 1
     for w in drange(1, 2, '0.05'):
-        x, cant_iter = SOR(A, x, b, w, tol)
+        x, cant_iter,p = SOR(A, x, b, w, tol)
         iteraciones_w[w] = cant_iter
+        exportarresultadosacsv(x)
     minimo = 1
     for (w, cant_iter) in iteraciones_w:
         if cant_iter < minimo:
@@ -37,7 +39,7 @@ def generar_termino_independiente(n):
     b = [0]*n
     x = [0]*n
     q = [0]*n
-    g = 2  # este es el numero de grupo lo deberíamos cambiar cuando nos digan que grupo somos
+    g = 12
     for i in range(n):
         x[i] = i/n
         q[i] = g+(g**2)*(x[i]-x[i]**2)
@@ -88,9 +90,20 @@ def SOR(A, x, b, w, tol):
         cant_iteraciones += 1
         s = x.copy()
         e = error(x, xant)
-    return (x, cant_iteraciones)
-
-
+    p=calcularp(x)
+    return (x, cant_iteraciones,p)
+def calcularp(x)
+    p=(ln((x[n-1]-x[n-2])/(x[n-2]-x[n-3])))/ln((x[n-2]-x[n-3])/(x[n-3]-x[n-4]))
+    return p
+def exportarresultadosacsv(x)
+    import csv
+    csvfile = "<path to output csv or txt>"
+    with open(csvfile, "w") as output:
+        writer = csv.writer(output, lineterminator='\n')
+        for val in x:
+            writer.writerow([val])
+            
+            
 def gauss_seidel(coeficientes, semilla, b, i, n):
     suma = 0
     # der
