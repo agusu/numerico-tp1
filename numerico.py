@@ -1,6 +1,5 @@
 import decimal
-
-
+import math
 def main():
     n = 10
     semilla = [0] * n  # arbitraria
@@ -11,7 +10,7 @@ def main():
     w = obtener_w_optimo(matriz, semilla, f, tol)
     tol = 0.0001
     x, cant_iter,p = SOR(matriz, semilla, f, w, tol)
-    exportarresultadosacsv(x)
+    #exportarresultadosacsv(x)
 
 
 def drange(x, y, jump):
@@ -26,10 +25,10 @@ def obtener_w_optimo(A, x, b, tol):
     for w in drange(1, 2, '0.05'):
         x, cant_iter,p = SOR(A, x, b, w, tol)
         iteraciones_w[w] = cant_iter
-        exportarresultadosacsv(x)
+        #exportarresultadosacsv(x)
     minimo = 1
     for (w, cant_iter) in iteraciones_w:
-        if cant_iter < minimo:
+        if cant_iter < minimo: 
             minimo = cant_iter
             w_optimo = w
     return w_optimo
@@ -59,6 +58,7 @@ def matriz_ceros(n):
 
 def generar_matriz_inicializada(n):
     if n < 5:
+        print("hola")
         return 0
     matriz = matriz_ceros(n)
     matriz[0][0] = 1  # i = 0
@@ -77,6 +77,7 @@ def generar_matriz_inicializada(n):
     matriz[n - 2] = matriz[1][::-1]  # n-1
     matriz[n - 1][n - 1] = 1  # n
 
+    return(matriz)
 
 def SOR(A, x, b, w, tol):
     n = len(A)
@@ -92,17 +93,18 @@ def SOR(A, x, b, w, tol):
         e = error(x, xant)
     p=calcularp(x)
     return (x, cant_iteraciones,p)
-def calcularp(x)
-    p=(ln((x[n-1]-x[n-2])/(x[n-2]-x[n-3])))/ln((x[n-2]-x[n-3])/(x[n-3]-x[n-4]))
+def calcularp(x):
+    n=len(x)
+    p=(math.log((x[n-1]-x[n-2])/(x[n-2]-x[n-3])))/math.log((x[n-2]-x[n-3])/(x[n-3]-x[n-4]))
     return p
-def exportarresultadosacsv(x)
+"""def exportarresultadosacsv(x):
     import csv
     csvfile = "<path to output csv or txt>"
     with open(csvfile, "w") as output:
         writer = csv.writer(output, lineterminator='\n')
         for val in x:
             writer.writerow([val])
-            
+   """         
             
 def gauss_seidel(coeficientes, semilla, b, i, n):
     suma = 0
@@ -127,5 +129,4 @@ def error(x, xant):
         resultado.append((x[i] - xant[i]))
     norma = max(resultado) / max(x)
     return norma
-
-generar_matriz_inicializada(10)
+main()
