@@ -1,7 +1,7 @@
 import decimal
 import math
 def main():
-    n = 10
+    n = 50
     semilla = [0] * n  # arbitraria
     matriz = generar_matriz_inicializada(n)
     f = generar_termino_independiente(n)
@@ -24,6 +24,7 @@ def obtener_w_optimo(A, semilla, b, tol):
     w_optimo = 1
     for w in drange(1, 2, '0.05'):
         x, cant_iter,p = SOR(A, semilla, b, w, tol)
+        print(cant_iter)
         iteraciones_w[w] = cant_iter
         #exportarresultadosacsv(x)
     minimo = 1
@@ -78,24 +79,23 @@ def generar_matriz_inicializada(n):
 
     return(matriz)
 
-def SOR(A, x, b, w, tol):
+def SOR(A, s, b, w, tol):
     n = len(A)
-    s = x.copy()
     cant_iteraciones = 0
     e = 1
+    x_ant=s.copy()
+    x_res=s.copy()
     while (e > tol):
-        xant = x.copy()
+        x_ant=x_res.copy()
         for i in range(n):
-            x[i] = s[i] * (1 - w) + w * gauss_seidel(A[i], s, b[i], i, n)
+            x_res[i] = x_ant[i] * (1 - w) + w * gauss_seidel(A[i], x_ant, b[i], i, n)
         cant_iteraciones += 1
-        s = x.copy()
-        e = error(x, xant)
-    p=calcularp(x)
-    return (x, cant_iteraciones,p)
+        e = error(x_res, x_ant)
+    p=calcularp(x_res)
+    return (x_res, cant_iteraciones,p)
 def calcularp(x):
     n=len(x)
-    p=1
-    #p=(math.log((x[n-1]-x[n-2])/(x[n-2]-x[n-3])))/math.log((x[n-2]-x[n-3])/(x[n-3]-x[n-4]))
+    p=(math.log((x[n-1]-x[n-2])/(x[n-2]-x[n-3])))/math.log((x[n-2]-x[n-3])/(x[n-3]-x[n-4]))
     return p
 """def exportarresultadosacsv(x):
     import csv
