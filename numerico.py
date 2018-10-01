@@ -29,10 +29,10 @@ def obtener_w_optimo(A, semilla, b, tol):
         print(cant_iter)
         iteraciones_w[w] = cant_iter
         # exportarresultadosacsv(x)
-    minimo = 1
-    for (w, cant_iter) in enumerate(iteraciones_w):
-        if cant_iter < minimo:
-            minimo = cant_iter
+    minimo = iteraciones_w[1]
+    for i in drange(1, 2, '0.05'):
+        if iteraciones_w[i] < minimo:
+            minimo = iteraciones_w[i]
             w_optimo = w
     return w_optimo
 
@@ -100,9 +100,9 @@ def SOR(A, s, b, w, tol):
 
 def calcular_p(x):
     n = len(x)
-    # p = (math.log((x[n - 1] - x[n - 2]) / (x[n - 2] - x[n - 3]))) / math.log(
-    #    (x[n - 2] - x[n - 3]) / (x[n - 3] - x[n - 4])))
-    #return p
+    p = math.log((abs(x[n - 1] - x[n - 2])) / abs(x[n - 2] - x[n - 3])) / math.log(
+        abs(x[n - 2] - x[n - 3]) / abs(x[n - 3] - x[n - 4]))
+    return p
 
 
 """def exportarresultadosacsv(x):

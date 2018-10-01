@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$USER_HOME$/PycharmProjects/numerico-tp1/.idea/numerico-tp1.iml" filepath="$USER_HOME$/PycharmProjects/numerico-tp1/.idea/numerico-tp1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/numerico-tp1.iml" filepath="$PROJECT_DIR$/.idea/numerico-tp1.iml" />
     </modules>
   </component>
 </project>
