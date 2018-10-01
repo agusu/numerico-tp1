@@ -35,8 +35,7 @@ def obtener_w_optimo(A, semilla, b, tol):
 
 
 def generar_termino_independiente(n):
-    b = [0]*n            x[i] = s[i] * (1 - w) + w * gauss_seidel(A[i], s, b[i], i, n)
-
+    b = [0]*n
     x = [0]*n
     q = [0]*n
     g = 12
