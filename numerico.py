@@ -19,30 +19,31 @@ def drange(x, y, jump):
         x += decimal.Decimal(jump)
 
 
-def obtener_w_optimo(A, x, b, tol):
+def obtener_w_optimo(A, semilla, b, tol):
     iteraciones_w = dict()
     w_optimo = 1
     for w in drange(1, 2, '0.05'):
-        x, cant_iter,p = SOR(A, x, b, w, tol)
+        x, cant_iter,p = SOR(A, semilla, b, w, tol)
         iteraciones_w[w] = cant_iter
         #exportarresultadosacsv(x)
     minimo = 1
-    for (w, cant_iter) in iteraciones_w:
-        if cant_iter < minimo: 
+    for (w, cant_iter) in enumerate(iteraciones_w):
+        if cant_iter < minimo:
             minimo = cant_iter
             w_optimo = w
     return w_optimo
 
 
 def generar_termino_independiente(n):
-    b = [0]*n
+    b = [0]*n            x[i] = s[i] * (1 - w) + w * gauss_seidel(A[i], s, b[i], i, n)
+
     x = [0]*n
     q = [0]*n
     g = 12
     for i in range(n):
         x[i] = i/n
         q[i] = g+(g**2)*(x[i]-x[i]**2)
-        b[i] = q[i]/(n**n)
+        b[i] = q[i]/(n**4)
     b[0] = 0
     b[n-1] = 0  # bien hardcodeado
     return b
@@ -58,7 +59,6 @@ def matriz_ceros(n):
 
 def generar_matriz_inicializada(n):
     if n < 5:
-        print("hola")
         return 0
     matriz = matriz_ceros(n)
     matriz[0][0] = 1  # i = 0
@@ -95,7 +95,8 @@ def SOR(A, x, b, w, tol):
     return (x, cant_iteraciones,p)
 def calcularp(x):
     n=len(x)
-    p=(math.log((x[n-1]-x[n-2])/(x[n-2]-x[n-3])))/math.log((x[n-2]-x[n-3])/(x[n-3]-x[n-4]))
+    p=1
+    #p=(math.log((x[n-1]-x[n-2])/(x[n-2]-x[n-3])))/math.log((x[n-2]-x[n-3])/(x[n-3]-x[n-4]))
     return p
 """def exportarresultadosacsv(x):
     import csv
