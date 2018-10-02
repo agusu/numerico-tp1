@@ -2,16 +2,28 @@ import decimal
 import math
 
 
+def prueba():
+    A = [[10, 2, 6], [1, 10, 4], [2, -7, -10]]
+    x, cant_iter, p = SOR(A,[1, 2, 3],[28, 7, -17], 1.033, 0.02, 1)
+    print(x,cant_iter,p)
+
+
 def main():
-    n = 50
-    semilla = [0] * n  # arbitraria
+    n = 5
+    semilla = [1] * n  # arbitraria
     matriz = generar_matriz_inicializada(n)
+    print(matriz)
     f = generar_termino_independiente(n)
+    print(f)
     # Se busca el w óptimo (menor cantidad de iteraciones)
     tol = 0.01
     w = obtener_w_optimo(matriz, semilla, f, tol)
+    print('w', w)
     tol = 0.0001
-    x, cant_iter, p = SOR(matriz, semilla, f, w, tol)
+    p = 1
+    x, cant_iter, p = SOR(matriz, semilla, f, w, tol, p)
+    print(x, cant_iter, p)
+
     # exportarresultadosacsv(x)
 
 
@@ -25,7 +37,7 @@ def obtener_w_optimo(A, semilla, b, tol):
     iteraciones_w = dict()
     w_optimo = 1
     for w in drange(1, 2, '0.05'):
-        x, cant_iter, p = SOR(A, semilla, b, w, tol)
+        x, cant_iter = SOR(A, semilla, b, w, tol)
         print(cant_iter)
         iteraciones_w[w] = cant_iter
         # exportarresultadosacsv(x)
@@ -82,7 +94,7 @@ def generar_matriz_inicializada(n):
     return matriz
 
 
-def SOR(A, s, b, w, tol):
+def SOR(A, s, b, w, tol, p=None):
     n = len(A)
     cant_iteraciones = 0
     e = 1
@@ -91,17 +103,20 @@ def SOR(A, s, b, w, tol):
     while e > tol:
         x_ant = x_res.copy()
         for i in range(n):
-            x_res[i] = x_ant[i] * (1 - w) + w * gauss_seidel(A[i], x_ant, b[i], i, n)
+            gs = gauss_seidel(A[i], x_ant, b[i], i, n)
+            x_res[i] = x_ant[i] * (1 - w) + w * gs
         cant_iteraciones += 1
         e = error(x_res, x_ant)
-    p = calcular_p(x_res)
-    return x_res, cant_iteraciones, p
+    if p:
+        return x_res, cant_iteraciones, p
+    return x_res, cant_iteraciones
 
 
 def calcular_p(x):
     n = len(x)
-    p = math.log((abs(x[n - 1] - x[n - 2])) / abs(x[n - 2] - x[n - 3])) / math.log(
-        abs(x[n - 2] - x[n - 3]) / abs(x[n - 3] - x[n - 4]))
+    num = abs(x[n - 1] - x[n - 2]) / abs(x[n - 2] - x[n - 3])
+    div = abs(x[n - 2] - x[n - 3]) / abs(x[n - 3] - x[n - 4])
+    p = math.log(num) / math.log(div)
     return p
 
 
@@ -133,13 +148,11 @@ def gauss_seidel(coeficientes, semilla, b, i, n):
             j = j - 1
     return b / coeficientes[i] - suma
 
-
 def error(x, xant):
     resultado = []
     for i in range(len(x)):
         resultado.append((x[i] - xant[i]))
-    norma = max(resultado) / max(x)
+    norma = abs(max(resultado) / max(x))
     return norma
 
-
-main()
+prueba()
