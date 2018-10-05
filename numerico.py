@@ -1,30 +1,28 @@
 import decimal
 import math
-
-
-def prueba():
-    A = [[10, 2, 6], [1, 10, 4], [2, -7, -10]]
-    x, cant_iter, p = SOR(A,[1, 2, 3],[28, 7, -17], 1.033, 0.02, 1)
-    print(x,cant_iter,p)
-
-
+from decimal import Decimal
+import numpy as np
 def main():
-    n = 5
-    semilla = [1] * n  # arbitraria
-    matriz = generar_matriz_inicializada(n)
-    print(matriz)
+    n = 10
+    largo = n + 1
+    semilla = [10] * largo  # arbitraria
+    matriz = generar_matriz_inicializada(largo)
     f = generar_termino_independiente(n)
-    print(f)
     # Se busca el w óptimo (menor cantidad de iteraciones)
-    tol = 0.01
+    tol = 0.0001
     w = obtener_w_optimo(matriz, semilla, f, tol)
-    print('w', w)
     tol = 0.0001
     p = 1
-    x, cant_iter, p = SOR(matriz, semilla, f, w, tol, p)
-    print(x, cant_iter, p)
-
-    # exportarresultadosacsv(x)
+    x, cant_iter= SOR(matriz, semilla, f, w, tol, True, True)
+    x = np.asarray(x)
+    print("x",x)
+    f = np.asarray(f)
+    print("f",f)
+    matriz = np.asarray(matriz)
+    casif = np.dot(x,matriz)
+    error = np.subtract(casif, f)
+    print("error", error)
+#graficar_resultado(x)
 
 
 def drange(x, y, jump):
@@ -36,30 +34,34 @@ def drange(x, y, jump):
 def obtener_w_optimo(A, semilla, b, tol):
     iteraciones_w = dict()
     w_optimo = 1
+    archivo = open("w_iteraciones_n.txt", "w")
+
     for w in drange(1, 2, '0.05'):
         x, cant_iter = SOR(A, semilla, b, w, tol)
-        print(cant_iter)
         iteraciones_w[w] = cant_iter
         # exportarresultadosacsv(x)
     minimo = iteraciones_w[1]
     for i in drange(1, 2, '0.05'):
         if iteraciones_w[i] < minimo:
             minimo = iteraciones_w[i]
-            w_optimo = w
+            w_optimo = i
+    escribir_dict(iteraciones_w, archivo)
+
     return w_optimo
 
 
 def generar_termino_independiente(n):
-    b = [0] * n
-    x = [0] * n
-    q = [0] * n
+    largo = n + 1
+    b = [0] * largo
+    x = [0] * largo
+    q = [0] * largo
     g = 12
-    for i in range(n):
+    for i in range(largo):
         x[i] = i / n
         q[i] = g + (g ** 2) * (x[i] - x[i] ** 2)
         b[i] = q[i] / (n ** 4)
     b[0] = 0
-    b[n - 1] = 0
+    b[largo - 1] = 0
     return b
 
 
@@ -93,8 +95,100 @@ def generar_matriz_inicializada(n):
 
     return matriz
 
+def normaInfinito(vect):
+    return abs(max(vect, key = lambda x: abs(x)))
 
-def SOR(A, s, b, w, tol, p=None):
+def calcular_p(dic):
+    n = len(dic)
+    x1 = dic[n - 1]
+    x2 = dic[n - 2]
+    x3 = dic[n - 3]
+    x4 = dic[n - 4]
+    num = normaInfinito(restar(x1, x2)) / normaInfinito(restar(x2, x3))
+    div = normaInfinito(restar(x2, x3)) / normaInfinito(restar(x3, x4))
+    p = math.log(num) / math.log(div)
+    return p
+
+
+"""def exportar_dict_csv(res):
+    import csv
+    csvfile = "res.csv"
+    with open(csvfile, 'w') as output:
+        writer = csv.writer(output, lineterminator='\n')
+        for i in res:
+            writer.writerow([i, res[i]])
+"""
+"""def truncar(vect, tol): # LE ESTOY PASANDO U NDICCIONARIO, MAL
+    truncado = []
+    for x in vect:
+        print('x', x, 'tol', tol)
+        truncado.append(decimal.Decimal(str(x)).quantize(decimal.Decimal(tol)))
+    return truncado
+"""
+
+def escribir_resultados(res, archivo):
+
+    """dump de los datos de la res seleccionada, formateado para mejor exportacion"""
+    n = len(res)
+    for i in range(n):
+        if i == 0:
+            archivo.write("{:.4E}".format(Decimal(res[i])))
+        else:
+            archivo.write("|" + "{:.4E}".format(Decimal(res[i])))
+    archivo.write("\n")
+
+def escribir_p(p, archivo):
+
+    archivo.write("p es {:.4E} \n".format(Decimal(p)))
+
+def escribir_dict(dicti, archivo):
+
+    archivo.write("w|cantidad de iteraciones\n")
+
+    for i in dicti:
+        archivo.write("{}|{}\n".format(i, dicti[i]))
+
+
+"""def escribir_w_iter(iter, w, archivo):
+    for i in range(len(iter)):
+        archivo.write("%d    %.2f\n" % (iter[i], w[i]))
+"""
+
+def SOR(A, s, b, w, tol, optimo=False, p=False):
+    n = len(A)
+    cant_iteraciones = 0
+    e = 1
+    k = 0
+    x_res = s.copy()
+    if optimo:
+        resultados = dict()
+        archivo = open("res_final.txt", "w")
+    else:
+        archivo = open("res_w_{}.txt".format(w), "w")
+    while e > tol:
+        if optimo:
+            resultados[k] = x_res.copy()
+        x_ant = x_res.copy()
+        for i in range(n):
+            x_gs = gauss_seidel(A[i], x_res, b[i], i, n)
+            x_res[i] = x_res[i] * (1 - w) + w * x_gs
+        escribir_resultados(x_res, archivo)
+        cant_iteraciones += 1
+        e = error(x_res, x_ant)
+        k += 1
+    if optimo and p:
+        escribir_p(calcular_p(resultados), archivo)
+    archivo.close()
+    return x_res, cant_iteraciones
+
+def gauss_seidel(coeficientes, semilla, b, i, n):
+    suma=0
+    for j in range(n):
+        if j != i and coeficientes[j] != 0:
+            suma += (coeficientes[j] * semilla[j]) / coeficientes[i]
+    return (b / coeficientes[i] )- suma
+
+"""def SOR(A, s, b, w, tol):
     n = len(A)
     cant_iteraciones = 0
     e = 1
@@ -102,57 +196,37 @@ def SOR(A, s, b, w, tol, p=None):
     x_res = s.copy()
     while e > tol:
         x_ant = x_res.copy()
+        x_gs = gauss_seidel(A, x_ant, b, n)
         for i in range(n):
-            gs = gauss_seidel(A[i], x_ant, b[i], i, n)
-            x_res[i] = x_ant[i] * (1 - w) + w * gs
+            x_res[i] = x_ant[i] * (1 - w) + w * x_gs[i]
         cant_iteraciones += 1
         e = error(x_res, x_ant)
-    if p:
-        return x_res, cant_iteraciones, p
     return x_res, cant_iteraciones
 
+def gauss_seidel (matriz, semilla, b, n):
+    s = semilla.copy()
+    for i in range(n):
+        suma = 0
+        for j in range(n):
+            if j != i:
+                suma += matriz[i][j] * s[j] / matriz[i][i]
+        s[i] = b[i] / matriz[i][i] - suma
+    return s"""
 
-def calcular_p(x):
-    n = len(x)
-    num = abs(x[n - 1] - x[n - 2]) / abs(x[n - 2] - x[n - 3])
-    div = abs(x[n - 2] - x[n - 3]) / abs(x[n - 3] - x[n - 4])
-    p = math.log(num) / math.log(div)
-    return p
+def restar(x, y):
+    #print('voy a restar',x,'con y',y)
+    #print(x[1],'-',y[1],'=',)
+    return [x[i] - y[i] for i in range(len(x))]
 
-
-"""def exportarresultadosacsv(x):
-    import csv
-    csvfile = "<path to output csv or txt>"
-    with open(csvfile, "w") as output:
-        writer = csv.writer(output, lineterminator='\n')
-        for val in x:
-            writer.writerow([val])
-   """
-
-
-def gauss_seidel(coeficientes, semilla, b, i, n):
-    suma = 0
-    # der
-    j = i + 1
-    if j != n-1:
-        while j < n:
-            if coeficientes[j] != 0:
-                suma += coeficientes[j] * semilla[j] / coeficientes[i]
-            j += 1
-    # izq
-    j = i - 1
-    if j != -1:
-        while j >= 0:
-            if coeficientes[j] != 0:
-                suma += coeficientes[j] * semilla[j] / coeficientes[i]
-            j = j - 1
-    return b / coeficientes[i] - suma
 
 def error(x, xant):
-    resultado = []
-    for i in range(len(x)):
-        resultado.append((x[i] - xant[i]))
-    norma = abs(max(resultado) / max(x))
-    return norma
+    return normaInfinito(restar(x,xant))/normaInfinito(x)
 
-prueba()
+def graficar_resultado(res):
+    n = len(res)
+
+    x = [i for i in range(n)]
+
+    plt.plot(x,res)
+    plt.show()
+main()
