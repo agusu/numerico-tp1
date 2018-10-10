@@ -77,6 +77,7 @@ def SOR(A, s, b, w, tol, optimo=False, p=False):
         k += 1
     if optimo and p:
         escribir_p(calcular_p(resultados), archivo)
+    escribir_error(x_res, e, archivo)
     archivo.close()
     return x_res, cant_iteraciones
 
@@ -174,6 +175,11 @@ def restar_vectores(x, y):
 def error(x, xant):
     """Calcula el error relativo entre dos vectores."""
     return normaInfinito(restar_vectores(x, xant)) / normaInfinito(x)
+
+
+def escribir_error(x, error, archivo):
+    e = normaInfinito(x) * error
+    archivo.write("El error absoluto es {:.4E} \n".format(Decimal(e)))
 
 
 main()
