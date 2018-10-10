@@ -6,7 +6,7 @@ from decimal import Decimal
 def main():
     n = 10
     largo = n + 1
-    semilla = [10] * largo  # arbitraria
+    semilla = [0] * largo  # arbitraria
     matriz = generar_matriz_inicializada(largo)
     f = generar_termino_independiente(n)
     # Se busca el w óptimo (menor cantidad de iteraciones)
@@ -62,11 +62,14 @@ def SOR(A, s, b, w, tol, optimo=False, p=False):
     if optimo:
         resultados = dict()
         archivo = open("res_final.txt", "w")
+        archivo_orden = open("orden_convergencia.txt", "w")
+        archivo_orden.write("cantidad de iteraciones|error relativo\n")
     else:
         archivo = open("res_w_{}.txt".format(w), "w")
     while e > tol:
         if optimo:
             resultados[k] = x_res.copy()
+            escribir_orden_convergencia(cant_iteraciones, e, archivo_orden)
         x_ant = x_res.copy()
         for i in range(n):
             x_gs = gauss_seidel(A[i], x_res, b[i], i, n)
@@ -77,6 +80,7 @@ def SOR(A, s, b, w, tol, optimo=False, p=False):
         k += 1
     if optimo and p:
         escribir_p(calcular_p(resultados), archivo)
+        archivo_orden.close()
     escribir_error(x_res, e, archivo)
     archivo.close()
     return x_res, cant_iteraciones
@@ -176,6 +180,9 @@ def error(x, xant):
     """Calcula el error relativo entre dos vectores."""
     return normaInfinito(restar_vectores(x, xant)) / normaInfinito(x)
 
+def escribir_orden_convergencia(cant_iteraciones, e, archivo_orden):
+    """Exporta el error relativo en funcion a la cantidad de iteraciones"""
+    archivo_orden.write("{}|{}\n".format(cant_iteraciones, e))
 
 def escribir_error(x, error, archivo):
     e = normaInfinito(x) * error
