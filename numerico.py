@@ -113,7 +113,7 @@ def calcular_p(dic):
     x4 = dic[n - 4]
     num = normaInfinito(restar_vectores(x1, x2)) / normaInfinito(restar_vectores(x2, x3))
     div = normaInfinito(restar_vectores(x2, x3)) / normaInfinito(restar_vectores(x3, x4))
-    p = math.log(num) / math.log(div)
+    p = abs(math.log(num) / math.log(div))
     return p
 
 
